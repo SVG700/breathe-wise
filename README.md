@@ -229,8 +229,19 @@ npm run test:coverage
 | **Component** | `tests/components/ImpactTrackerView.test.tsx` | Cumulative metrics rendering, entry logging modal, deletion, streak tracking | ✅ 4/4 Passing |
 | **Component** | `tests/components/DailyPlannerView.test.tsx` | Persona selector switching (6 personas), diurnal routine slots, health tips | ✅ 3/3 Passing |
 | **Component** | `tests/components/LocationSearch.test.tsx` | City search debounce, autocomplete dropdown, popular quick-selects, geolocation | ✅ 4/4 Passing |
+| **Component** | `tests/components/IndoorAdvisorView.test.tsx` | IAQ diagnostic tool, dwelling options, risk score recalculation, HEPA vs houseplant evidence | ✅ 4/4 Passing |
+| **Component** | `tests/components/PollutionMapView.test.tsx` | Cartographic map rendering, Leaflet layer initialization, Cleaner Route Simulator tab | ✅ 2/2 Passing |
+| **Component** | `tests/components/LandingPage.test.tsx` | Hero section branding, Sanskrit badge प्राण, CTA link to dashboard, Meet Prana modal | ✅ 1/1 Passing |
 | **Component** | `tests/components/Navbar.test.tsx` | Brand identity, Sanskrit badge प्राण, all route links, active page highlighting | ✅ 1/1 Passing |
-| **Total** | **12 Test Suites** | **45 Comprehensive Tests** | **100% Pass Rate** |
+| **Total** | **15 Test Suites** | **52 Comprehensive Tests** | **100% Pass Rate** |
+
+### ⚙️ Continuous Integration (GitHub Actions)
+
+A dedicated GitHub Actions workflow (`.github/workflows/ci.yml`) runs on every commit and pull request to `master`:
+- Installs production and testing dependencies via `npm ci`
+- Executes ESLint code quality checks (`npm run lint`)
+- Executes the full Vitest automated test suite (`npm test`)
+- Executes production Next.js build verification (`npm run build`)
 
 ---
 

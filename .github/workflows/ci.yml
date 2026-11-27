@@ -1,0 +1,42 @@
+name: Breathe Wise CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test-and-build:
+    name: Automated Tests & Production Build Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Code Quality & Lint Check
+        run: npm run lint
+
+      - name: Execute Vitest Automated Test Suite
+        run: npm test
+
+      - name: Verify Production Next.js Build
+        run: npm run build
+        env:
+          NEXT_PUBLIC_DEFAULT_CITY: Bengaluru
+          NEXT_PUBLIC_DEFAULT_LAT: 12.9716
+          NEXT_PUBLIC_DEFAULT_LON: 77.5946

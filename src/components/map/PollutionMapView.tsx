@@ -79,8 +79,8 @@ export default function PollutionMapView() {
       centerMarker.bindPopup(`
         <div style="font-family: sans-serif; font-size: 12px; padding: 4px;">
           <strong style="font-size: 14px; color: #0F172A;">${location.name}</strong><br/>
-          <span>US AQI: <strong>${aqi}</strong> (${airQuality?.summary.severityLevel || 'Live'})</span><br/>
-          <span>PM2.5: <strong>${airQuality?.pollutants.pm25.value ?? '--'} µg/m³</strong></span><br/>
+          <span>US AQI: <strong>${aqi}</strong> (${airQuality?.summary?.severityLevel || 'Live'})</span><br/>
+          <span>PM2.5: <strong>${airQuality?.pollutants?.pm25?.value ?? '--'} µg/m³</strong></span><br/>
           <span style="font-size: 10px; color: #64748B;">Open-Meteo Verified Station</span>
         </div>
       `).openPopup();
