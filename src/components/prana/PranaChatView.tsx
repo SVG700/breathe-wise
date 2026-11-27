@@ -138,6 +138,10 @@ export default function PranaChatView() {
         },
         timeOfDay: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         persona,
+        sourceAttribution: airQuality?.sourceAttribution || 'Open-Meteo Atmospheric Model',
+        isRealTime: airQuality?.isRealTime ?? false,
+        lastUpdated: airQuality?.lastUpdated || new Date().toISOString(),
+        hourlyForecast: airQuality?.hourlyForecast?.slice(0, 12),
         station: stationContext ? {
           id: stationContext.id,
           name: stationContext.name,
@@ -147,7 +151,9 @@ export default function PranaChatView() {
           coordinates: stationContext.coordinates,
           cpcbAqi: stationContext.cpcbAqi,
           measurements: stationContext.measurements,
-          lastUpdated: stationContext.lastUpdated
+          lastUpdated: stationContext.lastUpdated,
+          freshnessStatus: stationContext.freshnessStatus,
+          isRealTime: stationContext.isRealTime
         } : undefined
       };
 

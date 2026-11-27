@@ -22,6 +22,15 @@ export interface PranaMessage {
   };
 }
 
+export interface HourlyForecastSummary {
+  time: string;
+  timestamp: string;
+  usAqi: number;
+  pm25: number;
+  pm10: number;
+  ozone: number;
+}
+
 export interface PranaContextPayload {
   location: string;
   coordinates: { lat: number; lon: number };
@@ -33,8 +42,15 @@ export interface PranaContextPayload {
     o3: number;
     no2?: number;
     co?: number;
+    units?: Record<string, string>;
   };
   timeOfDay: string;
   persona: UserPersona;
   specialConditions?: string[];
+  hourlyForecast?: HourlyForecastSummary[];
+  sourceAttribution?: string;
+  isRealTime?: boolean;
+  lastUpdated?: string;
+  isStale?: boolean;
+  station?: any;
 }
