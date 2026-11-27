@@ -38,9 +38,41 @@ function generateHeuristicResponse(
   const location = context?.location || 'Bengaluru';
   const pm25 = context?.pollutants?.pm25 || 25;
   const persona = context?.persona || 'working-professional';
+  const station = context?.station;
   const qLower = question.toLowerCase();
 
   let responseText = '';
+
+  // Station-specific inquiry handling
+  if (station) {
+    const stationAqi = station.cpcbAqi ?? aqi;
+    const stationCategory = station.cpcbCategory ?? severity;
+    const isModel = station.source?.includes('Model');
+
+    responseText = `**Prana (प्राण) Station Assessment for ${station.name}:**\n\n` +
+      `📍 **Location & Source:** ${station.locality || location} (${station.distanceKm ? `${station.distanceKm} km away` : 'Selected Coordinates'}). ` +
+      `Data provided by **${station.source}** (${station.provider || 'CPCB/OpenAQ'}).\n` +
+      `📊 **Air Quality Index:** **${stationAqi} (${stationCategory})**${station.isOfficial ? ' — Official CPCB NAQI (3+ monitored parameters)' : ' — Indicative Parameter Sub-Index'}.\n` +
+      `⏱️ **Freshness:** ${station.freshness || 'Latest available measurement'} (${station.lastUpdated ? new Date(station.lastUpdated).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Recent'}).\n\n`;
+
+    if (qLower.includes('run') || qLower.includes('jog') || qLower.includes('exercise')) {
+      if (stationAqi <= 50) {
+        responseText += `🏃 **Running Suitability:** **Optimal.** The air around this station is clean with minimal particulate load. Early mornings or late afternoons are great for outdoor cardio.\n\n`;
+      } else if (stationAqi <= 100) {
+        responseText += `🏃 **Running Suitability:** **Acceptable with Moderation.** Safe for healthy adults, but sensitive runners or those with mild asthma should limit intense interval training to under 45 minutes.\n\n`;
+      } else {
+        responseText += `🛑 **Running Suitability:** **Not Recommended Outdoors.** At AQI ${stationAqi}, deep aerobic breathing pulls significant fine particles (PM2.5) deep into pulmonary alveoli. Shift your workout indoors today.\n\n`;
+      }
+    } else {
+      responseText += `🔬 **Atmospheric Breakdown:**\n` +
+        `• Primary particulate level: ${station.measurements?.pm25?.value ? `${station.measurements.pm25.value} µg/m³ PM2.5` : `${pm25} µg/m³ estimated`}.\n` +
+        `• ${isModel ? 'Atmospheric reanalysis estimates show ambient urban particulate concentration.' : 'Direct ground sensor observations reflect localized tailpipe and street-level exposure.'}\n` +
+        `• **Precautionary Guide:** ${stationAqi > 100 ? 'Wear an N95 respirator if walking along busy corridors nearby, and keep windows closed during peak commute hours.' : 'Normal outdoor activities are safe; stay hydrated.'}\n\n`;
+    }
+
+    responseText += `*Note: Prana provides preventative environmental guidance based on validated atmospheric standards, not medical diagnosis.*`;
+    return responseText;
+  }
 
   if (qLower.includes('jog') || qLower.includes('run') || qLower.includes('exercise') || qLower.includes('outdoor')) {
     if (aqi <= 50) {
@@ -145,6 +177,16 @@ CURRENT USER & ENVIRONMENTAL CONTEXT:
   * Carbon Monoxide (CO): ${context?.pollutants?.co || 'N/A'} µg/m³
 - Time of Day: ${context?.timeOfDay || new Date().toLocaleTimeString()}
 - User Persona: ${context?.persona || 'General Citizen'}
+${context?.station ? `
+- SPECIFIC MONITORING STATION IN FOCUS:
+  * Station Name: ${context.station.name} (${context.station.provider || 'Ground Sensor'})
+  * Data Source: ${context.station.source}
+  * Distance: ${context.station.distanceKm ?? 0} km from target coordinates
+  * CPCB Calculated AQI / Sub-Index: ${context.station.cpcbAqi || 'N/A'} (${context.station.cpcbCategory || 'N/A'}) - ${context.station.isOfficial ? 'Official 3+ Pollutant NAQI' : 'Indicative Parameter Sub-Index'}
+  * Station Reported Pollutants: ${JSON.stringify(context.station.measurements || {})}
+  * Freshness Status: ${context.station.freshness || 'N/A'} (Last Recorded: ${context.station.lastUpdated || 'N/A'})
+  * Instructions: Explain this station's actual readings, address the user query regarding running/precautions, note whether measurements are recent or historical, and clearly distinguish ground observations from atmospheric models.
+` : ''}
 
 CONVERSATION HISTORY (Previous interactions):
 ${Array.isArray(history) && history.length > 0 

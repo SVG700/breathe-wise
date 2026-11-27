@@ -256,3 +256,18 @@ export async function searchLocations(query: string): Promise<GeoLocation[]> {
     admin1: item.admin1
   }));
 }
+
+export async function fetchNearbyStations(
+  lat: number,
+  lon: number,
+  radius = 35000,
+  pollutant = 'all'
+): Promise<any> {
+  const url = `/api/air-quality/stations?lat=${lat}&lon=${lon}&radius=${radius}&pollutant=${pollutant}`;
+  const res = await fetch(url);
+  if (!res.ok) {
+    throw new Error(`Failed to fetch stations: HTTP ${res.status}`);
+  }
+  return res.json();
+}
+

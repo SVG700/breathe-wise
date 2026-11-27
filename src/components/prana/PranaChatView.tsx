@@ -39,7 +39,16 @@ const PERSONA_LABELS: Record<UserPersona, { title: string; icon: string }> = {
 };
 
 export default function PranaChatView() {
-  const { location, airQuality, persona, setPersona } = useApp();
+  const { 
+    location, 
+    airQuality, 
+    persona, 
+    setPersona,
+    stationContext,
+    setStationContext,
+    initialPranaPrompt,
+    setInitialPranaPrompt
+  } = useApp();
   const [messages, setMessages] = useState<PranaMessage[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -130,7 +139,18 @@ export default function PranaChatView() {
           co: airQuality?.pollutants?.carbonMonoxide?.value ?? 300,
         },
         timeOfDay: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        persona
+        persona,
+        station: stationContext ? {
+          id: stationContext.id,
+          name: stationContext.name,
+          provider: stationContext.provider,
+          source: stationContext.source,
+          distanceKm: stationContext.distanceKm,
+          coordinates: stationContext.coordinates,
+          cpcbAqi: stationContext.cpcbAqi,
+          measurements: stationContext.measurements,
+          lastUpdated: stationContext.lastUpdated
+        } : undefined
       };
 
       const res = await fetch('/api/prana/chat', {
@@ -176,6 +196,15 @@ export default function PranaChatView() {
       setIsLoading(false);
     }
   };
+
+  // Handle incoming initial prompt (e.g. from Prana Map station analysis)
+  useEffect(() => {
+    if (initialPranaPrompt && !isLoading) {
+      const promptToRun = initialPranaPrompt;
+      setInitialPranaPrompt?.(null);
+      handleSend(promptToRun);
+    }
+  }, [initialPranaPrompt, isLoading]);
 
   const handleRetry = (lastUserQuery: string) => {
     handleSend(lastUserQuery);
@@ -245,6 +274,41 @@ export default function PranaChatView() {
           </button>
         </div>
       </div>
+
+      {/* Station Focus Bar if active */}
+      {stationContext && (
+        <div className="flex-shrink-0 bg-emerald-50/90 dark:bg-emerald-950/60 border-b border-emerald-200 dark:border-emerald-800/60 px-4 py-2 flex items-center justify-between text-xs text-emerald-900 dark:text-emerald-200">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="font-semibold flex items-center gap-1 text-emerald-700 dark:text-emerald-300">
+              <MapPin className="w-3.5 h-3.5 text-emerald-600" />
+              Station Focus:
+            </span>
+            <span className="font-medium text-slate-900 dark:text-slate-100">{stationContext.name}</span>
+            <span className="text-[11px] text-slate-500">({stationContext.distanceKm.toFixed(1)} km away)</span>
+            <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-900 font-mono font-medium">
+              {stationContext.source === 'openaq' ? 'OpenAQ Ground Station' : 'Atmospheric Model Node'}
+            </span>
+            {stationContext.cpcbAqi && (
+              <span 
+                className="text-[10px] px-1.5 py-0.5 rounded font-bold"
+                style={{ 
+                  backgroundColor: `${stationContext.cpcbAqi.categoryColor}20`, 
+                  color: stationContext.cpcbAqi.categoryColor 
+                }}
+              >
+                CPCB {stationContext.cpcbAqi.aqi} • {stationContext.cpcbAqi.category}
+              </span>
+            )}
+          </div>
+          <button
+            onClick={() => setStationContext?.(null)}
+            className="text-xs text-emerald-700 dark:text-emerald-400 hover:text-emerald-900 dark:hover:text-emerald-200 underline cursor-pointer ml-2 flex-shrink-0"
+            title="Clear station focus"
+          >
+            Clear focus
+          </button>
+        </div>
+      )}
 
       {/* Messages Scroll Area - Independent Scroll Container */}
       <div 

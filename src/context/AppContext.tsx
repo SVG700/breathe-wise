@@ -92,6 +92,11 @@ interface AppContextType {
   isPranaModalOpen: boolean;
   setIsPranaModalOpen: (open: boolean) => void;
   requestCurrentLocation: () => Promise<void>;
+  stationContext?: any | null;
+  setStationContext?: (st: any | null) => void;
+  initialPranaPrompt?: string | null;
+  setInitialPranaPrompt?: (prompt: string | null) => void;
+  openPranaWithStation?: (station: any, prompt?: string) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -104,6 +109,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [persona, setPersonaState] = useState<UserPersona>('working-professional');
   const [impactLogs, setImpactLogs] = useState<ImpactLogEntry[]>([]);
   const [isPranaModalOpen, setIsPranaModalOpen] = useState<boolean>(false);
+  const [stationContext, setStationContext] = useState<any | null>(null);
+  const [initialPranaPrompt, setInitialPranaPrompt] = useState<string | null>(null);
+
+  const openPranaWithStation = useCallback((station: any, customPrompt?: string) => {
+    setStationContext(station);
+    const defaultPrompt = customPrompt || `Tell me about air quality at ${station.name}. Is it safe for outdoor activities?`;
+    setInitialPranaPrompt(defaultPrompt);
+    setIsPranaModalOpen(true);
+  }, []);
 
   // Load persisted settings and impact logs on client mount
   useEffect(() => {
@@ -301,6 +315,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
         isPranaModalOpen,
         setIsPranaModalOpen,
         requestCurrentLocation,
+        stationContext,
+        setStationContext,
+        initialPranaPrompt,
+        setInitialPranaPrompt,
+        openPranaWithStation,
       }}
     >
       {children}
