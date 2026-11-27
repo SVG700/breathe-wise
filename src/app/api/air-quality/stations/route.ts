@@ -85,9 +85,11 @@ export async function GET(req: NextRequest) {
     if (openaqConfigured) {
       try {
         const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 8000); // 8-second timeout
+        const timeout = setTimeout(() => controller.abort(), 9000); // 9-second timeout
 
-        const openaqUrl = `https://api.openaq.org/v3/locations?coordinates=${lat},${lon}&radius=${radiusMeters}&limit=25`;
+        // OpenAQ v3 enforces max radius of 25000 meters
+        const openaqRadius = Math.min(25000, Math.max(1000, radiusMeters));
+        const openaqUrl = `https://api.openaq.org/v3/locations?coordinates=${lat},${lon}&radius=${openaqRadius}&limit=15`;
         const openaqRes = await fetch(openaqUrl, {
           headers: {
             'X-API-Key': openaqApiKey!,
@@ -103,7 +105,24 @@ export async function GET(req: NextRequest) {
           const json = await openaqRes.json();
           const locations = json.results || [];
 
-          for (const loc of locations) {
+          // Sort by recent activity or distance, fetch latest readings for top locations
+          const targetLocations = locations.slice(0, 8);
+          const latestPromises = targetLocations.map((loc: any) =>
+            fetch(`https://api.openaq.org/v3/locations/${loc.id}/latest`, {
+              headers: {
+                'X-API-Key': openaqApiKey!,
+                'Accept': 'application/json',
+              },
+              next: { revalidate: 300 },
+            })
+              .then((r) => (r.ok ? r.json() : { results: [] }))
+              .catch(() => ({ results: [] }))
+          );
+
+          const latestDataList = await Promise.all(latestPromises);
+
+          for (let i = 0; i < targetLocations.length; i++) {
+            const loc = targetLocations[i];
             const locLat = loc.coordinates?.latitude;
             const locLon = loc.coordinates?.longitude;
             if (typeof locLat !== 'number' || typeof locLon !== 'number') continue;
@@ -111,28 +130,69 @@ export async function GET(req: NextRequest) {
             const measurements: Record<string, OpenAQMeasurement> = {};
             const availableParameters: string[] = [];
 
-            // Parse available sensors and recent measurements
+            // Build sensor parameter mapping
+            const sensorMap = new Map<number, any>();
             if (Array.isArray(loc.sensors)) {
               for (const sensor of loc.sensors) {
-                const paramName = sensor.parameter?.name?.toLowerCase();
-                if (!paramName) continue;
-                availableParameters.push(paramName);
-
-                // If sensor carries latest value summary
-                if (sensor.latest && typeof sensor.latest.value === 'number') {
-                  const paramValue = sensor.latest.value;
-                  const unit = sensor.parameter?.units || 'µg/m³';
-                  const lastUpdated = sensor.latest.datetime?.utc || loc.datetimeLast?.utc || new Date().toISOString();
-
-                  measurements[paramName] = {
-                    parameter: sensor.parameter?.displayName || paramName.toUpperCase(),
-                    value: paramValue,
-                    unit,
-                    lastUpdated,
-                    subIndex: calculateSubIndex(paramName, paramValue, unit),
-                  };
+                sensorMap.set(sensor.id, sensor);
+                const pName = sensor.parameter?.name?.toLowerCase();
+                if (pName && !availableParameters.includes(pName)) {
+                  availableParameters.push(pName);
                 }
               }
+            }
+
+            // Populate measurements from /latest
+            const latestReadings = latestDataList[i]?.results || [];
+            let latestTimestamp = loc.datetimeLast?.utc || loc.datetimeLast?.local;
+
+            for (const item of latestReadings) {
+              const sensor = sensorMap.get(item.sensorsId);
+              if (!sensor) continue;
+              const paramName = sensor.parameter?.name?.toLowerCase();
+              if (!paramName) continue;
+
+              const validParams = ['pm25', 'pm10', 'no2', 'so2', 'co', 'o3'];
+              if (!validParams.includes(paramName)) continue;
+
+              let paramValue = typeof item.value === 'number' ? item.value : parseFloat(item.value);
+              if (isNaN(paramValue) || paramValue < 0) continue;
+
+              const originalUnit = sensor.parameter?.units || 'µg/m³';
+              let unit = originalUnit;
+
+              // Unit normalization for CPCB NAQI calculation
+              if (originalUnit.toLowerCase() === 'ppb') {
+                if (paramName === 'no2') {
+                  paramValue = Math.round(paramValue * 1.88 * 100) / 100;
+                  unit = 'µg/m³';
+                } else if (paramName === 'so2') {
+                  paramValue = Math.round(paramValue * 2.62 * 100) / 100;
+                  unit = 'µg/m³';
+                } else if (paramName === 'o3') {
+                  paramValue = Math.round(paramValue * 2.0 * 100) / 100;
+                  unit = 'µg/m³';
+                } else if (paramName === 'co') {
+                  paramValue = Math.round(((paramValue * 1.15) / 1000) * 100) / 100;
+                  unit = 'mg/m³';
+                }
+              } else if (originalUnit.toLowerCase() === 'ppm' && paramName === 'co') {
+                paramValue = Math.round(paramValue * 1.145 * 100) / 100;
+                unit = 'mg/m³';
+              }
+
+              const itemTime = item.datetime?.utc || item.datetime?.local;
+              if (itemTime && (!latestTimestamp || new Date(itemTime) > new Date(latestTimestamp))) {
+                latestTimestamp = itemTime;
+              }
+
+              measurements[paramName] = {
+                parameter: sensor.parameter?.displayName || paramName.toUpperCase(),
+                value: paramValue,
+                unit,
+                lastUpdated: itemTime || latestTimestamp || new Date().toISOString(),
+                subIndex: calculateSubIndex(paramName, paramValue, unit),
+              };
             }
 
             // If pollutant filter is specified, only include station if sensor parameter exists
@@ -146,14 +206,14 @@ export async function GET(req: NextRequest) {
             }
 
             const cpcb = calculateCpcbAqi(rawMeasurementsForCpcb);
-            const lastUpdated = loc.datetimeLast?.utc || loc.datetimeLast?.local || new Date().toISOString();
+            const lastUpdated = latestTimestamp || new Date().toISOString();
 
             stations.push({
               id: `openaq-${loc.id}`,
               name: loc.name || `Monitoring Station #${loc.id}`,
               locality: loc.locality || undefined,
               country: loc.country?.name || 'India',
-              provider: loc.provider?.name || loc.owner?.name || 'OpenAQ Ground Station',
+              provider: loc.provider?.name || loc.owner?.name || 'CPCB Ground Station',
               coordinates: { latitude: locLat, longitude: locLon },
               distanceKm: calculateDistanceKm(lat, lon, locLat, locLon),
               isRealTime: true,
