@@ -5,7 +5,7 @@ import { NextRequest } from 'next/server';
 // Mock @google/generative-ai
 vi.mock('@google/generative-ai', () => {
   return {
-    GoogleGenerativeAI: vi.fn().mockImplementation((key: string) => {
+    GoogleGenerativeAI: vi.fn().mockImplementation(() => {
       return {
         getGenerativeModel: vi.fn().mockImplementation(({ model }: { model: string }) => {
           if (model === 'trigger-error') {

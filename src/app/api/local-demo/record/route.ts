@@ -16,7 +16,8 @@ export async function GET() {
   });
 }
 
-export async function POST(req: NextRequest) {
+export async function POST(req?: NextRequest) {
+  void req;
   if (process.env.NODE_ENV === 'production') {
     return NextResponse.json({ error: 'Not Found' }, { status: 404 });
   }

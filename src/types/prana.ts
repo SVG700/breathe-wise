@@ -1,5 +1,3 @@
-import { AirQualityData } from './airQuality';
-
 export type UserPersona = 
   | 'working-professional'
   | 'college-student'

@@ -60,6 +60,9 @@ export default function PranaAssistantModal() {
           onClick={() => setIsPranaModalOpen(false)}
         >
           <div 
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="prana-modal-title"
             className="relative w-full max-w-4xl h-[90vh] max-h-[800px] bg-white dark:bg-slate-900 rounded-3xl shadow-2xl flex flex-col overflow-hidden border border-emerald-900/20"
             onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside
           >
@@ -70,7 +73,7 @@ export default function PranaAssistantModal() {
                   प्राण
                 </div>
                 <div>
-                  <h3 className="font-bold text-sm flex items-center gap-2">
+                  <h3 id="prana-modal-title" className="font-bold text-sm flex items-center gap-2">
                     Breathe Wise — Prana Assistant
                   </h3>
                   <p className="text-[11px] text-emerald-300">Breathe Better. Live Better.</p>

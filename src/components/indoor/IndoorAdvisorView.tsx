@@ -9,10 +9,7 @@ import {
   Flower2, 
   ShieldCheck, 
   AlertTriangle, 
-  Sparkles, 
-  CheckCircle,
-  HelpCircle,
-  Info
+  Sparkles
 } from 'lucide-react';
 
 export default function IndoorAdvisorView() {
@@ -63,9 +60,9 @@ export default function IndoorAdvisorView() {
           <div className="flex items-center gap-2 text-xs font-bold text-emerald-800 dark:text-emerald-400 uppercase tracking-wider">
             <Home className="w-3.5 h-3.5" /> Indoor Micro-Environment Diagnostic
           </div>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight mt-1">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight mt-1">
             Indoor Air Quality (IAQ) Advisor
-          </h2>
+          </h1>
           <p className="text-xs sm:text-sm text-slate-500 max-w-2xl mt-1">
             People spend up to 90% of their time indoors where pollutants can concentrate at 2 to 5 times outdoor levels. Configure your home setup below to receive personalized mitigation protocols.
           </p>
@@ -177,8 +174,9 @@ export default function IndoorAdvisorView() {
           {/* Toggles */}
           <div className="pt-2 border-t border-slate-100 dark:border-slate-800 grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
             {/* HEPA Purifier */}
-            <label className="flex items-center gap-2 p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 cursor-pointer">
+            <label htmlFor="filter-hepa" className="flex items-center gap-2 p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 cursor-pointer">
               <input
+                id="filter-hepa"
                 type="checkbox"
                 checked={hasHepa}
                 onChange={(e) => setHasHepa(e.target.checked)}
@@ -188,8 +186,9 @@ export default function IndoorAdvisorView() {
             </label>
 
             {/* Incense / Dhoop */}
-            <label className="flex items-center gap-2 p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 cursor-pointer">
+            <label htmlFor="filter-incense" className="flex items-center gap-2 p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 cursor-pointer">
               <input
+                id="filter-incense"
                 type="checkbox"
                 checked={usesIncense}
                 onChange={(e) => setUsesIncense(e.target.checked)}
@@ -199,8 +198,9 @@ export default function IndoorAdvisorView() {
             </label>
 
             {/* Pets */}
-            <label className="flex items-center gap-2 p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 cursor-pointer">
+            <label htmlFor="filter-pets" className="flex items-center gap-2 p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 cursor-pointer">
               <input
+                id="filter-pets"
                 type="checkbox"
                 checked={hasPets}
                 onChange={(e) => setHasPets(e.target.checked)}

@@ -8,8 +8,6 @@ import {
   Bike, 
   Users, 
   Zap, 
-  Trash2, 
-  ArrowRight, 
   Check, 
   HelpCircle,
   Calculator,
@@ -116,7 +114,6 @@ export default function SustainableAlternativesView() {
   const carEmission = Math.round(commuteDistance * 0.18 * 100) / 100; // 180g/km
   const metroEmission = Math.round(commuteDistance * 0.04 * 100) / 100; // 40g/km
   const evEmission = Math.round(commuteDistance * 0.05 * 100) / 100; // 50g/km grid equivalent
-  const bikeEmission = 0;
 
   const co2SavedByMetro = Math.max(0, Math.round((carEmission - metroEmission) * 100) / 100);
 
@@ -133,9 +130,9 @@ export default function SustainableAlternativesView() {
         <div className="flex items-center gap-2 text-xs font-bold text-emerald-800 dark:text-emerald-400 uppercase tracking-wider">
           <Leaf className="w-3.5 h-3.5" /> Everyday Emission Reductions
         </div>
-        <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
           Sustainable Living & Clean Alternatives
-        </h2>
+        </h1>
         <p className="text-xs sm:text-sm text-slate-500 max-w-2xl">
           Clean air is both a personal right and a collective responsibility. Explore actionable changes that cut your personal exposure while reducing the emissions your lifestyle contributes back into your neighborhood.
         </p>
@@ -162,10 +159,15 @@ export default function SustainableAlternativesView() {
           </div>
 
           <div className="flex items-center gap-3">
-            <label className="text-xs font-bold text-slate-700 dark:text-slate-300">
+            <label htmlFor="commute-distance-slider" className="text-xs font-bold text-slate-700 dark:text-slate-300">
               Trip Distance: <span className="text-emerald-700 dark:text-emerald-400 text-sm">{commuteDistance} km</span>
             </label>
             <input
+              id="commute-distance-slider"
+              aria-label="Daily round-trip commute distance in kilometers"
+              aria-valuemin={2}
+              aria-valuemax={50}
+              aria-valuenow={commuteDistance}
               type="range"
               min="2"
               max="50"

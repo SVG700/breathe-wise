@@ -4,7 +4,6 @@ import React from 'react';
 import { useApp } from '@/context/AppContext';
 import { 
   ShieldCheck, 
-  ShieldAlert, 
   Wind, 
   Home, 
   Sparkles, 
@@ -31,7 +30,7 @@ export default function AQIOverviewCard() {
     );
   }
 
-  const { summary, pollutants, lastUpdated, sourceAttribution } = airQuality;
+  const { summary, lastUpdated, sourceAttribution } = airQuality;
   const formattedTime = new Date(lastUpdated).toLocaleTimeString([], {
     hour: '2-digit',
     minute: '2-digit',
@@ -55,11 +54,11 @@ export default function AQIOverviewCard() {
               <Radio className="w-3.5 h-3.5 animate-pulse text-emerald-600" /> Live Air Quality Station
             </span>
           </div>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight mt-1">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight mt-1">
             {location.name}
             {location.admin1 ? <span className="text-slate-500 font-normal text-lg">, {location.admin1}</span> : null}
             {location.country ? <span className="text-slate-400 font-normal text-base"> ({location.country})</span> : null}
-          </h2>
+          </h1>
         </div>
 
         <div className="flex flex-col sm:items-end text-xs text-slate-500">

@@ -4,16 +4,10 @@ import React, { useState } from 'react';
 import { useApp } from '@/context/AppContext';
 import { UserPersona } from '@/types/prana';
 import { 
-  Sun, 
-  CloudSun, 
-  Moon, 
   Clock, 
   Sparkles, 
   CheckCircle2, 
-  AlertCircle, 
-  ShieldCheck,
-  RefreshCw,
-  Info
+  RefreshCw
 } from 'lucide-react';
 
 interface RoutineSlot {
@@ -60,11 +54,9 @@ const PERSONA_CONFIG: Record<UserPersona, { label: string; icon: string; desc: s
 
 export default function DailyPlannerView() {
   const { persona, setPersona, airQuality, location, setIsPranaModalOpen } = useApp();
-  const [customGoal, setCustomGoal] = useState('');
   const [isRegenerating, setIsRegenerating] = useState(false);
 
   const aqi = airQuality?.summary.usAqi ?? 75;
-  const pm25 = airQuality?.pollutants.pm25.value ?? 25;
 
   const generateSchedule = (): RoutineSlot[] => {
     const isHighPollution = aqi > 120;
@@ -236,9 +228,9 @@ export default function DailyPlannerView() {
             <div className="flex items-center gap-2 text-xs font-bold text-emerald-800 dark:text-emerald-400 uppercase tracking-wider">
               <Sparkles className="w-3.5 h-3.5" /> Prana Dynamic Routine Engine
             </div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight mt-1">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight mt-1">
               Personalized Daily Clean-Air Planner
-            </h2>
+            </h1>
             <p className="text-xs sm:text-sm text-slate-500 max-w-xl mt-1">
               Tailored daily schedules generated in real time based on {location.name}’s current AQI of <strong>{aqi}</strong> and your specific daily lifestyle persona.
             </p>

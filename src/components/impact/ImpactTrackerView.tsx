@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react';
 import { useApp, IMPACT_ACTIONS } from '@/context/AppContext';
 import { ActionCategory } from '@/types/impact';
 import { 
-  BarChart3, 
   Leaf, 
   Flame, 
   Trash2, 
@@ -12,8 +11,6 @@ import {
   Award, 
   TrendingUp, 
   Info,
-  Calendar,
-  Sparkles,
   Zap,
   Train,
   Bike,
@@ -108,9 +105,9 @@ export default function ImpactTrackerView() {
             <div className="flex items-center gap-2 text-xs font-bold text-emerald-800 dark:text-emerald-400 uppercase tracking-wider">
               <Leaf className="w-3.5 h-3.5" /> Collective Environmental Accountability
             </div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight mt-1">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight mt-1">
               Environmental Impact Tracker
-            </h2>
+            </h1>
             <p className="text-xs sm:text-sm text-slate-500 max-w-xl mt-1">
               Every low-emission choice directly prevents pollutants from entering your community’s air basin. Track your personal contributions over time.
             </p>
@@ -281,14 +278,15 @@ export default function ImpactTrackerView() {
 
       {/* Record Sustainable Choice Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm animate-in fade-in">
+        <div role="dialog" aria-modal="true" aria-labelledby="record-action-modal-title" className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm animate-in fade-in">
           <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 max-w-lg w-full shadow-2xl border border-slate-200 dark:border-slate-800 space-y-4">
             <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
-              <h3 className="font-extrabold text-base text-slate-900 dark:text-slate-100 flex items-center gap-2">
+              <h3 id="record-action-modal-title" className="font-extrabold text-base text-slate-900 dark:text-slate-100 flex items-center gap-2">
                 <Leaf className="w-4 h-4 text-emerald-600" /> Record a Clean-Air Action
               </h3>
               <button
                 onClick={() => setShowAddModal(false)}
+                aria-label="Close modal"
                 className="text-slate-400 hover:text-slate-600 text-sm"
               >
                 ✕
@@ -317,10 +315,12 @@ export default function ImpactTrackerView() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="font-bold text-slate-700 dark:text-slate-300">
+                <label htmlFor="action-quantity" className="font-bold text-slate-700 dark:text-slate-300">
                   Quantity ({currentActionDef.unitLabel}):
                 </label>
                 <input
+                  id="action-quantity"
+                  aria-label={`Quantity of activity in ${currentActionDef.unitLabel}`}
                   type="number"
                   min="1"
                   max="1000"
@@ -332,8 +332,10 @@ export default function ImpactTrackerView() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="font-bold text-slate-700 dark:text-slate-300">Personal Notes (optional):</label>
+                <label htmlFor="action-notes" className="font-bold text-slate-700 dark:text-slate-300">Personal Notes (optional):</label>
                 <input
+                  id="action-notes"
+                  aria-label="Personal notes"
                   type="text"
                   placeholder="e.g. Took purple line metro instead of driving"
                   value={notes}

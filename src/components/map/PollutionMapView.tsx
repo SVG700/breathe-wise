@@ -84,8 +84,10 @@ export default function PollutionMapView() {
     let isSubscribed = true;
 
     async function initMap() {
+      if (!isSubscribed) return;
       if (typeof window === 'undefined' || !mapContainerRef.current) return;
       const L = (await import('leaflet')).default;
+      if (!isSubscribed) return;
 
       // Ensure leaflet stylesheet is present
       if (!document.getElementById('leaflet-css')) {
@@ -246,7 +248,7 @@ export default function PollutionMapView() {
     return () => {
       isSubscribed = false;
     };
-  }, [location, aqi, aqiColor, activeTab, routeMode, stations, selectedStation]);
+  }, [location, aqi, aqiColor, activeTab, routeMode, stations, selectedStation, airQuality?.pollutants?.pm25?.value, airQuality?.summary?.severityLevel]);
 
   const handleAskPrana = (station: OpenAQStation) => {
     openPranaWithStation?.(station);
@@ -265,9 +267,9 @@ export default function PollutionMapView() {
             <div className="flex items-center gap-2 text-xs font-bold text-emerald-800 dark:text-emerald-400 uppercase tracking-wider">
               <Compass className="w-3.5 h-3.5" /> Prana Air Intelligence Map
             </div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight mt-1">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight mt-1">
               Interactive Pollution & Sensor Map
-            </h2>
+            </h1>
             <p className="text-xs sm:text-sm text-slate-500 max-w-xl mt-1">
               Real ground monitoring stations from OpenAQ & Copernicus Atmospheric models, analyzed with Indian CPCB NAQI standards.
             </p>

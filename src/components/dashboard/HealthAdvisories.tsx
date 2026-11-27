@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useApp } from '@/context/AppContext';
-import { Shield, HeartPulse, Baby, Bike, Home, AlertCircle } from 'lucide-react';
+import { Shield, HeartPulse, Baby, Bike, Home } from 'lucide-react';
 
 export default function HealthAdvisories() {
   const { airQuality, isLoading } = useApp();

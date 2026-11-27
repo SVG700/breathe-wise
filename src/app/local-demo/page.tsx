@@ -5,13 +5,9 @@ import { notFound } from 'next/navigation';
 import { 
   Video, 
   Play, 
-  CheckCircle2, 
   Clock, 
   Folder, 
-  FileText, 
-  AlertTriangle, 
   Loader2,
-  Sparkles,
   ShieldAlert
 } from 'lucide-react';
 

@@ -2,8 +2,7 @@
 
 import React from 'react';
 import { useApp } from '@/context/AppContext';
-import { Sparkles, Wind, ShieldCheck, Activity, ArrowUpRight } from 'lucide-react';
-import Link from 'next/link';
+import { ArrowUpRight } from 'lucide-react';
 
 export default function AirQualityVisualizer() {
   const { location, airQuality, setIsPranaModalOpen } = useApp();

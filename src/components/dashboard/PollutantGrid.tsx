@@ -3,7 +3,6 @@
 import React from 'react';
 import { useApp } from '@/context/AppContext';
 import { PollutantDetail } from '@/types/airQuality';
-import { Info, AlertCircle, CheckCircle2 } from 'lucide-react';
 
 export default function PollutantGrid() {
   const { airQuality, isLoading } = useApp();

@@ -14,9 +14,7 @@ import {
   Check, 
   ArrowDown,
   RotateCw,
-  Cpu,
-  ShieldCheck,
-  AlertCircle
+  ShieldCheck
 } from 'lucide-react';
 
 const SUGGESTED_PROMPTS = [
@@ -109,7 +107,7 @@ export default function PranaChatView() {
     }
   }, [messages, isLoading, scrollToBottom]);
 
-  const handleSend = async (textToSend?: string) => {
+  const handleSend = useCallback(async (textToSend?: string) => {
     const query = (textToSend || input).trim();
     if (!query || isLoading) return;
 
@@ -195,7 +193,7 @@ export default function PranaChatView() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [input, isLoading, location, airQuality, persona, stationContext, messages]);
 
   // Handle incoming initial prompt (e.g. from Prana Map station analysis)
   useEffect(() => {
@@ -204,7 +202,7 @@ export default function PranaChatView() {
       setInitialPranaPrompt?.(null);
       handleSend(promptToRun);
     }
-  }, [initialPranaPrompt, isLoading]);
+  }, [initialPranaPrompt, isLoading, handleSend, setInitialPranaPrompt]);
 
   const handleRetry = (lastUserQuery: string) => {
     handleSend(lastUserQuery);
@@ -253,8 +251,10 @@ export default function PranaChatView() {
 
         {/* Persona Selector Dropdown */}
         <div className="flex items-center gap-2">
-          <label className="text-xs font-medium text-slate-600 dark:text-slate-400">Persona:</label>
+          <label htmlFor="persona-select" className="text-xs font-medium text-slate-600 dark:text-slate-400">Persona:</label>
           <select
+            id="persona-select"
+            aria-label="Select User Persona"
             value={persona}
             onChange={(e) => setPersona(e.target.value as UserPersona)}
             className="text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-300 dark:border-slate-700 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-emerald-600 cursor-pointer"
@@ -284,7 +284,9 @@ export default function PranaChatView() {
               Station Focus:
             </span>
             <span className="font-medium text-slate-900 dark:text-slate-100">{stationContext.name}</span>
-            <span className="text-[11px] text-slate-500">({stationContext.distanceKm.toFixed(1)} km away)</span>
+            {stationContext.distanceKm != null && (
+              <span className="text-[11px] text-slate-500">({stationContext.distanceKm.toFixed(1)} km away)</span>
+            )}
             <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-900 font-mono font-medium">
               {stationContext.source === 'openaq' ? 'OpenAQ Ground Station' : 'Atmospheric Model Node'}
             </span>
@@ -461,6 +463,7 @@ export default function PranaChatView() {
       >
         <input
           type="text"
+          aria-label="Ask Prana an air quality question"
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder={`Ask Prana about ${location.name}'s air, precautions, or daily choices...`}

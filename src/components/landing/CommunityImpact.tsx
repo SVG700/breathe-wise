@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { useApp } from '@/context/AppContext';
-import { Heart, Users, ShieldCheck, Sparkles, ArrowRight } from 'lucide-react';
+import { Users, Sparkles, ArrowRight } from 'lucide-react';
 
 export default function CommunityImpact() {
   const { setIsPranaModalOpen } = useApp();

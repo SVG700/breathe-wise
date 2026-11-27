@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { useApp } from '@/context/AppContext';
 import { POPULAR_CITIES, searchLocations } from '@/services/airQualityApi';
 import { GeoLocation } from '@/types/airQuality';
-import { Search, MapPin, Navigation, Loader2 } from 'lucide-react';
+import { Search, Navigation, Loader2 } from 'lucide-react';
 
 export default function LocationSearch() {
   const { location, setLocation, requestCurrentLocation, isLoading } = useApp();

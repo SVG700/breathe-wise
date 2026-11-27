@@ -242,7 +242,7 @@ Provide a structured, helpful, friendly and scientifically grounded response as 
         modelUsed: 'Prana Autonomous Environmental Engine',
         isFallback: true,
         statusLabel: 'Autonomous Fallback Mode (Gemini API Temporary Unavailable)',
-        errorNotice: 'Temporary Gemini API unavailability; autonomous environmental reasoning applied.',
+        errorNotice: lastError?.message || 'Temporary Gemini API unavailability; autonomous environmental reasoning applied.',
         timestamp: new Date().toISOString(),
       }
     });

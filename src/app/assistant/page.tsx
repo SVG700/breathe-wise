@@ -1,6 +1,6 @@
 import React from 'react';
 import PranaChatView from '@/components/prana/PranaChatView';
-import { Sparkles, ShieldCheck, Heart } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 
 export const metadata = {
   title: 'Prana (प्राण) — AI Air Quality Assistant | Breathe Wise',

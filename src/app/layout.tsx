@@ -27,8 +27,14 @@ export default function RootLayout({
     <html lang="en" className="scroll-smooth">
       <body className={`${inter.className} min-h-screen flex flex-col bg-[#F8FAF9] dark:bg-slate-950 text-slate-900 dark:text-slate-100 antialiased`}>
         <AppProvider>
+          <a
+            href="#main-content"
+            className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-emerald-800 focus:text-white focus:rounded-xl focus:shadow-xl focus:outline-none focus:ring-2 focus:ring-white"
+          >
+            Skip to main content
+          </a>
           <Navbar />
-          <main className="flex-1">
+          <main id="main-content" tabIndex={-1} className="flex-1 outline-none">
             {children}
           </main>
           <Footer />

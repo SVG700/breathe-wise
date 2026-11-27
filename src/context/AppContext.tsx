@@ -1,9 +1,10 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, ReactNode } from 'react';
 import { AirQualityData, GeoLocation } from '@/types/airQuality';
 import { UserPersona } from '@/types/prana';
 import { ActionCategory, ImpactLogEntry, ImpactMetrics, ImpactActionOption } from '@/types/impact';
+import { OpenAQStation } from '@/types/openaq';
 import { DEFAULT_LOCATION, fetchAirQuality } from '@/services/airQualityApi';
 
 export const IMPACT_ACTIONS: ImpactActionOption[] = [
@@ -92,11 +93,11 @@ interface AppContextType {
   isPranaModalOpen: boolean;
   setIsPranaModalOpen: (open: boolean) => void;
   requestCurrentLocation: () => Promise<void>;
-  stationContext?: any | null;
-  setStationContext?: (st: any | null) => void;
+  stationContext?: OpenAQStation | null;
+  setStationContext?: (st: OpenAQStation | null) => void;
   initialPranaPrompt?: string | null;
   setInitialPranaPrompt?: (prompt: string | null) => void;
-  openPranaWithStation?: (station: any, prompt?: string) => void;
+  openPranaWithStation?: (station: OpenAQStation, prompt?: string) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -109,10 +110,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [persona, setPersonaState] = useState<UserPersona>('working-professional');
   const [impactLogs, setImpactLogs] = useState<ImpactLogEntry[]>([]);
   const [isPranaModalOpen, setIsPranaModalOpen] = useState<boolean>(false);
-  const [stationContext, setStationContext] = useState<any | null>(null);
+  const [stationContext, setStationContext] = useState<OpenAQStation | null>(null);
   const [initialPranaPrompt, setInitialPranaPrompt] = useState<string | null>(null);
 
-  const openPranaWithStation = useCallback((station: any, customPrompt?: string) => {
+  const openPranaWithStation = useCallback((station: OpenAQStation, customPrompt?: string) => {
     setStationContext(station);
     const defaultPrompt = customPrompt || `Tell me about air quality at ${station.name}. Is it safe for outdoor activities?`;
     setInitialPranaPrompt(defaultPrompt);
@@ -173,19 +174,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const setPersona = (newPersona: UserPersona) => {
+  const setPersona = useCallback((newPersona: UserPersona) => {
     setPersonaState(newPersona);
     try {
       localStorage.setItem('breathewise_persona', newPersona);
-    } catch (e) {}
-  };
+    } catch {}
+  }, []);
 
-  const setLocation = (newLoc: GeoLocation) => {
+  const setLocation = useCallback((newLoc: GeoLocation) => {
     setLocationState(newLoc);
     try {
       localStorage.setItem('breathewise_location', JSON.stringify(newLoc));
-    } catch (e) {}
-  };
+    } catch {}
+  }, []);
 
   const loadData = useCallback(async (loc: GeoLocation) => {
     setIsLoading(true);
@@ -193,9 +194,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     try {
       const data = await fetchAirQuality(loc);
       setAirQuality(data);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to fetch air quality:', err);
-      setError(err?.message || 'Failed to fetch air quality data');
+      setError(err instanceof Error ? err.message : 'Failed to fetch air quality data');
     } finally {
       setIsLoading(false);
     }
@@ -205,11 +206,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
     loadData(location);
   }, [location, loadData]);
 
-  const refreshAirQuality = async () => {
+  const refreshAirQuality = useCallback(async () => {
     await loadData(location);
-  };
+  }, [loadData, location]);
 
-  const requestCurrentLocation = async () => {
+  const requestCurrentLocation = useCallback(async () => {
     if (!navigator.geolocation) {
       alert('Geolocation is not supported by your browser.');
       return;
@@ -233,9 +234,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       },
       { timeout: 10000, enableHighAccuracy: true }
     );
-  };
+  }, [setLocation]);
 
-  const addImpactLog = (actionId: ActionCategory, quantity: number, notes?: string) => {
+  const addImpactLog = useCallback((actionId: ActionCategory, quantity: number, notes?: string) => {
     const actionDef = IMPACT_ACTIONS.find(a => a.id === actionId);
     if (!actionDef) return;
 
@@ -253,30 +254,34 @@ export function AppProvider({ children }: { children: ReactNode }) {
       notes
     };
 
-    const updated = [newEntry, ...impactLogs];
-    setImpactLogs(updated);
-    try {
-      localStorage.setItem('breathewise_impact_logs', JSON.stringify(updated));
-    } catch (e) {}
-  };
+    setImpactLogs(prev => {
+      const updated = [newEntry, ...prev];
+      try {
+        localStorage.setItem('breathewise_impact_logs', JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
+  }, []);
 
-  const deleteImpactLog = (id: string) => {
-    const updated = impactLogs.filter(log => log.id !== id);
-    setImpactLogs(updated);
-    try {
-      localStorage.setItem('breathewise_impact_logs', JSON.stringify(updated));
-    } catch (e) {}
-  };
+  const deleteImpactLog = useCallback((id: string) => {
+    setImpactLogs(prev => {
+      const updated = prev.filter(log => log.id !== id);
+      try {
+        localStorage.setItem('breathewise_impact_logs', JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
+  }, []);
 
-  const clearImpactLogs = () => {
+  const clearImpactLogs = useCallback(() => {
     setImpactLogs([]);
     try {
       localStorage.removeItem('breathewise_impact_logs');
-    } catch (e) {}
-  };
+    } catch {}
+  }, []);
 
   // Calculate cumulative impact metrics
-  const impactMetrics: ImpactMetrics = React.useMemo(() => {
+  const impactMetrics: ImpactMetrics = useMemo(() => {
     const totalCo2SavedKg = Math.round(impactLogs.reduce((acc, log) => acc + log.co2SavedKg, 0) * 10) / 10;
     const totalPmSavedGram = Math.round(impactLogs.reduce((acc, log) => acc + log.pmSavedGram, 0) * 10) / 10;
     const totalActionsCount = impactLogs.length;
@@ -296,32 +301,51 @@ export function AppProvider({ children }: { children: ReactNode }) {
     };
   }, [impactLogs]);
 
+  const contextValue = useMemo<AppContextType>(() => ({
+    location,
+    setLocation,
+    airQuality,
+    isLoading,
+    error,
+    refreshAirQuality,
+    persona,
+    setPersona,
+    impactLogs,
+    addImpactLog,
+    deleteImpactLog,
+    clearImpactLogs,
+    impactMetrics,
+    isPranaModalOpen,
+    setIsPranaModalOpen,
+    requestCurrentLocation,
+    stationContext,
+    setStationContext,
+    initialPranaPrompt,
+    setInitialPranaPrompt,
+    openPranaWithStation,
+  }), [
+    location,
+    setLocation,
+    airQuality,
+    isLoading,
+    error,
+    refreshAirQuality,
+    persona,
+    setPersona,
+    impactLogs,
+    addImpactLog,
+    deleteImpactLog,
+    clearImpactLogs,
+    impactMetrics,
+    isPranaModalOpen,
+    stationContext,
+    initialPranaPrompt,
+    openPranaWithStation,
+    requestCurrentLocation,
+  ]);
+
   return (
-    <AppContext.Provider
-      value={{
-        location,
-        setLocation,
-        airQuality,
-        isLoading,
-        error,
-        refreshAirQuality,
-        persona,
-        setPersona,
-        impactLogs,
-        addImpactLog,
-        deleteImpactLog,
-        clearImpactLogs,
-        impactMetrics,
-        isPranaModalOpen,
-        setIsPranaModalOpen,
-        requestCurrentLocation,
-        stationContext,
-        setStationContext,
-        initialPranaPrompt,
-        setInitialPranaPrompt,
-        openPranaWithStation,
-      }}
-    >
+    <AppContext.Provider value={contextValue}>
       {children}
     </AppContext.Provider>
   );
