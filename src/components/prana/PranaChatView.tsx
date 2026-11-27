@@ -123,11 +123,11 @@ export default function PranaChatView() {
         aqi: airQuality?.summary.usAqi ?? 70,
         severity: airQuality?.summary.severityLevel ?? 'Moderate',
         pollutants: {
-          pm25: airQuality?.pollutants.pm25.value ?? 25,
-          pm10: airQuality?.pollutants.pm10.value ?? 45,
-          o3: airQuality?.pollutants.ozone.value ?? 40,
-          no2: airQuality?.pollutants.nitrogenDioxide.value ?? 20,
-          co: airQuality?.pollutants.carbonMonoxide.value ?? 300,
+          pm25: airQuality?.pollutants?.pm25?.value ?? 25,
+          pm10: airQuality?.pollutants?.pm10?.value ?? 45,
+          o3: airQuality?.pollutants?.ozone?.value ?? 40,
+          no2: airQuality?.pollutants?.nitrogenDioxide?.value ?? 20,
+          co: airQuality?.pollutants?.carbonMonoxide?.value ?? 300,
         },
         timeOfDay: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         persona

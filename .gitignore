@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local demo recordings & automation output
+local-demo-output/
+*.webm
+*.mp4
+demo-run-report.txt

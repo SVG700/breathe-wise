@@ -268,6 +268,7 @@ export default function ImpactTrackerView() {
                     onClick={() => deleteImpactLog(log.id)}
                     className="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg transition-colors cursor-pointer"
                     title="Delete entry"
+                    aria-label={`Delete entry ${log.actionName}`}
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>

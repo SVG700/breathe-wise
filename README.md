@@ -197,6 +197,43 @@ npm start
 
 ---
 
+## 🧪 Automated Testing & Quality Assurance
+
+Breathe Wise includes a robust, automated test suite built with **Vitest**, **React Testing Library**, and **JSDOM**, covering unit calculations, API routes, end-to-end security policies, and UI component behavior.
+
+### 🏃 Running the Tests
+
+```bash
+# Run all automated tests
+npm test
+
+# Run tests in interactive watch mode
+npm run test:watch
+
+# Run tests with coverage reports
+npm run test:coverage
+```
+
+### 📋 Test Suite Breakdown
+
+| Category | Test Suite File | Coverage Scope | Status |
+|---|---|---|---|
+| **Unit** | `tests/unit/airQualityApi.test.ts` | US AQI categorization across all 6 bands (Good to Hazardous), Open-Meteo response parser, error handling | ✅ 10/10 Passing |
+| **Unit** | `tests/unit/impactCalculations.test.ts` | Commute emission formulas (car vs metro vs EV vs bike) using ARAI/EPA benchmarks, savings multipliers | ✅ 3/3 Passing |
+| **Unit** | `tests/unit/indoorAdvisor.test.ts` | IAQ diagnostic algorithm, hazardous penalty scoring (incense, unvented kitchen), HEPA mitigation credit | ✅ 3/3 Passing |
+| **API** | `tests/api/pranaChat.test.ts` | `/api/prana/chat` payload validation, Gemini cascade fallback, secret isolation (zero key leakage) | ✅ 4/4 Passing |
+| **E2E / Security** | `tests/e2e/routes.test.ts` | Public routes rendering, Production isolation guard (verifying `/local-demo` returns 404 in production) | ✅ 4/4 Passing |
+| **Component** | `tests/components/AQIOverviewCard.test.tsx` | Metric badge rendering, loading skeleton, safety checkpoints, live station info | ✅ 2/2 Passing |
+| **Component** | `tests/components/PranaChatView.test.tsx` | Initial welcome message, suggested prompt chips, message submission, AI reply streaming | ✅ 4/4 Passing |
+| **Component** | `tests/components/SustainableAlternativesView.test.tsx` | Commute slider distance recalculation, quick logging to impact tracker | ✅ 3/3 Passing |
+| **Component** | `tests/components/ImpactTrackerView.test.tsx` | Cumulative metrics rendering, entry logging modal, deletion, streak tracking | ✅ 4/4 Passing |
+| **Component** | `tests/components/DailyPlannerView.test.tsx` | Persona selector switching (6 personas), diurnal routine slots, health tips | ✅ 3/3 Passing |
+| **Component** | `tests/components/LocationSearch.test.tsx` | City search debounce, autocomplete dropdown, popular quick-selects, geolocation | ✅ 4/4 Passing |
+| **Component** | `tests/components/Navbar.test.tsx` | Brand identity, Sanskrit badge प्राण, all route links, active page highlighting | ✅ 1/1 Passing |
+| **Total** | **12 Test Suites** | **45 Comprehensive Tests** | **100% Pass Rate** |
+
+---
+
 ## ☁️ Deployment Instructions (Vercel)
 
 1. Push the project repository to GitHub or GitLab (ensure `.env.local` remains ignored).

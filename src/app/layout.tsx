@@ -5,6 +5,7 @@ import { AppProvider } from '@/context/AppContext';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import PranaAssistantModal from '@/components/prana/PranaAssistantModal';
+import LocalDemoLauncher from '@/components/layout/LocalDemoLauncher';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -32,6 +33,7 @@ export default function RootLayout({
           </main>
           <Footer />
           <PranaAssistantModal />
+          <LocalDemoLauncher />
         </AppProvider>
       </body>
     </html>

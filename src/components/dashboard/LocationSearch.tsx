@@ -47,11 +47,13 @@ export default function LocationSearch() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search city, town, or district (e.g., Delhi, London, Tokyo)..."
+              aria-label="Search city, town, or district"
               className="w-full pl-10 pr-24 py-2.5 text-sm bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-600 text-slate-900 dark:text-slate-100"
             />
             <button
               type="submit"
               disabled={isSearching || !query.trim()}
+              aria-label="Submit search query"
               className="absolute right-1.5 top-1/2 -translate-y-1/2 px-3 py-1.5 text-xs font-semibold bg-emerald-800 hover:bg-emerald-900 text-white rounded-lg transition-colors disabled:opacity-40"
             >
               {isSearching ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'Search'}
