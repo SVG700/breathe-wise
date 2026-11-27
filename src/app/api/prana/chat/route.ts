@@ -7,7 +7,7 @@ You are Prana (प्राण), the intelligent urban air-quality and environme
 Tagline: "Breathe Better. Live Better."
 
 CORE DIRECTIVES:
-1. Identity: You are knowledgeable, empathetic, calm, scientifically accurate, and actionable. You help individuals, families, and communities make healthier daily decisions.
+1. Identity: You are knowledgeable, empathetic, calm, scientifically accurate, and actionable. You help individuals, families, and communities make healthier daily decisions in polluted urban environments.
 2. Scientific Rigor:
    - Distinguish verified sensor measurements from estimates or forecasts.
    - Never fabricate real-time AQI numbers or measurements. Always reference the live environmental context passed to you.
@@ -21,6 +21,13 @@ CORE DIRECTIVES:
    - Concise, clear, beautifully formatted with clean bullet points or short paragraphs.
    - Always relate your answer directly to the user's persona (e.g. parent caring for children, senior citizen, athlete/jogger, commuter) and the current location's live AQI and pollutant concentrations.
 `;
+
+const CANDIDATE_GEMINI_MODELS = [
+  'gemini-3.5-flash-lite',
+  'gemini-flash-lite-latest',
+  'gemini-3.1-flash-lite',
+  'gemini-3.5-flash'
+];
 
 function generateHeuristicResponse(
   question: string,
@@ -90,7 +97,7 @@ function generateHeuristicResponse(
       `*Prana is continuously monitoring atmospheric parameters across ${location} to help you breathe wise.*`;
   }
 
-  return `${responseText}\n\n*(Note: Powered by Prana's autonomous environmental engine. To activate live Google Gemini neural reasoning, configure GEMINI_API_KEY in your .env.local).*`;
+  return responseText;
 }
 
 export async function POST(req: NextRequest) {
@@ -104,27 +111,27 @@ export async function POST(req: NextRequest) {
 
     const apiKey = process.env.GEMINI_API_KEY?.trim();
 
-    // If API key is not configured or empty, seamlessly serve through Prana's intelligent environmental heuristic engine
+    // If API key is missing or placeholder, serve through Prana's autonomous heuristic engine
     if (!apiKey || apiKey === 'your_gemini_api_key_here') {
       const fallbackContent = generateHeuristicResponse(message, context);
       return NextResponse.json({
         content: fallbackContent,
         metadata: {
-          modelUsed: 'Prana Autonomous Environmental Engine (Offline Heuristic)',
+          modelUsed: 'Prana Autonomous Environmental Engine',
           isFallback: true,
+          statusLabel: 'Offline / Autonomous Mode (No GEMINI_API_KEY configured)',
           timestamp: new Date().toISOString(),
         }
       });
     }
 
-    // Initialize Google Generative AI
+    // Try Google Generative AI with resilient model cascade
+    let lastError: any = null;
+    let successfulReply: string | null = null;
+    let successfulModelName: string | null = null;
+
     try {
       const genAI = new GoogleGenerativeAI(apiKey);
-      // Use gemini-2.5-flash or gemini-1.5-flash
-      const model = genAI.getGenerativeModel({
-        model: 'gemini-1.5-flash',
-        systemInstruction: PRANA_SYSTEM_INSTRUCTION
-      });
 
       const contextualPrompt = `
 CURRENT USER & ENVIRONMENTAL CONTEXT:
@@ -139,38 +146,66 @@ CURRENT USER & ENVIRONMENTAL CONTEXT:
 - Time of Day: ${context?.timeOfDay || new Date().toLocaleTimeString()}
 - User Persona: ${context?.persona || 'General Citizen'}
 
+CONVERSATION HISTORY (Previous interactions):
+${Array.isArray(history) && history.length > 0 
+  ? history.map((h: any) => `${h.role === 'user' ? 'User' : 'Prana'}: ${h.content}`).join('\n')
+  : 'None'
+}
+
 USER QUESTION:
 "${message}"
 
 Provide a structured, helpful, friendly and scientifically grounded response as Prana (प्राण).
 `;
 
-      const result = await model.generateContent(contextualPrompt);
-      const replyText = result.response.text();
+      // Cascade across candidate models
+      for (const modelName of CANDIDATE_GEMINI_MODELS) {
+        try {
+          const model = genAI.getGenerativeModel({
+            model: modelName,
+            systemInstruction: PRANA_SYSTEM_INSTRUCTION
+          });
 
-      return NextResponse.json({
-        content: replyText,
-        metadata: {
-          modelUsed: 'Google Gemini 1.5 Flash (Prana AI)',
-          isFallback: false,
-          timestamp: new Date().toISOString(),
+          const result = await model.generateContent(contextualPrompt);
+          successfulReply = result.response.text();
+          successfulModelName = modelName;
+          break; // Succeeded!
+        } catch (modelErr: any) {
+          lastError = modelErr;
+          console.warn(`Gemini model ${modelName} call failed, trying next candidate...`, modelErr?.message || modelErr);
         }
-      });
-    } catch (geminiError: any) {
-      console.warn('Gemini API call failed, falling back to Prana heuristic engine:', geminiError?.message || geminiError);
-      const fallbackContent = generateHeuristicResponse(message, context);
-      return NextResponse.json({
-        content: fallbackContent,
-        metadata: {
-          modelUsed: 'Prana Autonomous Environmental Engine (Fallback)',
-          isFallback: true,
-          errorNotice: geminiError?.message || 'Gemini API unreachable',
-          timestamp: new Date().toISOString(),
-        }
-      });
+      }
+
+      if (successfulReply && successfulModelName) {
+        return NextResponse.json({
+          content: successfulReply,
+          metadata: {
+            modelUsed: `Google Gemini (${successfulModelName})`,
+            isFallback: false,
+            statusLabel: 'Gemini Neural AI Connected',
+            timestamp: new Date().toISOString(),
+          }
+        });
+      }
+    } catch (clientErr: any) {
+      lastError = clientErr;
+      console.warn('Gemini client initialization failed:', clientErr?.message || clientErr);
     }
+
+    // If all candidate models in the cascade failed, gracefully serve the autonomous heuristic response
+    const fallbackContent = generateHeuristicResponse(message, context);
+    return NextResponse.json({
+      content: fallbackContent,
+      metadata: {
+        modelUsed: 'Prana Autonomous Environmental Engine',
+        isFallback: true,
+        statusLabel: 'Autonomous Fallback Mode (Gemini API Temporary Unavailable)',
+        errorNotice: 'Temporary Gemini API unavailability; autonomous environmental reasoning applied.',
+        timestamp: new Date().toISOString(),
+      }
+    });
   } catch (err: any) {
-    console.error('Prana chat route error:', err);
+    console.error('Prana chat route critical error:', err);
     return NextResponse.json({ error: 'Internal server error processing Prana request' }, { status: 500 });
   }
 }

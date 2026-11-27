@@ -18,6 +18,8 @@ export interface PranaMessage {
     actionableTips?: string[];
     riskLevel?: string;
     isFallback?: boolean;
+    statusLabel?: string;
+    errorNotice?: string;
     sources?: string[];
   };
 }

@@ -25,7 +25,7 @@ export default function AssistantPage() {
       </div>
 
       {/* Main Chat Container */}
-      <div className="h-[680px]">
+      <div className="h-[75vh] min-h-[520px] max-h-[780px]">
         <PranaChatView />
       </div>
 

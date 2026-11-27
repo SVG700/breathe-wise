@@ -166,6 +166,11 @@ export default function ImpactTrackerView() {
             <p className="text-[10px] text-slate-500">Environmental stewardship index</p>
           </div>
         </div>
+
+        <div className="pt-2 text-[11px] text-slate-400 italic flex items-center gap-1.5 border-t border-slate-100 dark:border-slate-800">
+          <Info className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
+          <span>Note: Environmental savings are transparent computational models based on ARAI/EPA commute benchmarks, distinct from directly measured physical sensor readings.</span>
+        </div>
       </div>
 
       {/* Weekly Progress Chart */}

@@ -238,6 +238,9 @@ export default function IndoorAdvisorView() {
                   style={{ width: `${risk.score}%`, backgroundColor: risk.color }}
                 />
               </div>
+              <p className="text-[10px] text-slate-400 italic pt-1">
+                * Preventative environmental heuristic based on self-reported dwelling parameters, not a clinical or laboratory particulate sensor measurement.
+              </p>
             </div>
 
             {/* Quick Action Plan */}

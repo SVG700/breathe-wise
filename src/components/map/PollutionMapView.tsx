@@ -122,7 +122,7 @@ export default function PollutionMapView() {
           <div style="font-family: sans-serif; font-size: 12px; padding: 2px;">
             <strong>${st.name}</strong><br/>
             <span>AQI: <strong>${stAqi}</strong></span><br/>
-            <span style="font-size: 10px; color: #64748B;">Regional Grid Node</span>
+            <span style="font-size: 10px; color: #64748B;">Simulated Micro-Node (Illustrative Grid)</span>
           </div>
         `);
       });
